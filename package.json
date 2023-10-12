@@ -1,0 +1,21 @@
+{
+    "name": "advent-module-shared",
+    "version": "1.0.0",
+    "description": "This is a module for the Advent Services and contains shared logic",
+    "main": "lib/index.js",
+    "scripts": {
+        "test": "node test/test.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/faithfm/advent-module-shared"
+    },
+    "author": "Robbie Berghan",
+    "license": "MIT",
+    "peerDependencies": {
+        "mongoose": "^7.1.1"
+    },
+    "dependencies": {
+        "advent-module-models": "github:faithfm/advent-module-models"
+    }
+}
