@@ -9,3 +9,4 @@ npm install faithfm/advent-module-shared
 
 const { WebhookLogic } = require('advent-module-shared');
 const { ProviderLogic } = require('advent-module-shared');
+const { SettingsLogic } = require('advent-module-shared');
