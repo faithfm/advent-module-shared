@@ -11,6 +11,7 @@ const { WebhookLogic } = require('advent-module-shared');
 const { ProviderLogic } = require('advent-module-shared');
 const { SettingsLogic } = require('advent-module-shared');
 const { AuthLogic } = require('advent-module-shared');
+const { Utils } = require('advent-module-shared');
 
 
 # Auth Functions
