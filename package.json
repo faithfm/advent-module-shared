@@ -13,9 +13,7 @@
     "author": "Robbie Berghan",
     "license": "MIT",
     "peerDependencies": {
-        "mongoose": "^7.1.1"
-    },
-    "dependencies": {
+        "mongoose": "^7.1.1",
         "advent-module-models": "github:faithfm/advent-module-models"
     }
 }
