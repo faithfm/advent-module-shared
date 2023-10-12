@@ -24,3 +24,13 @@ const { Utils } = require('advent-module-shared');
 API_MACHINE_TRUSTED_TOKEN
 AUTH_TOKEN_KEY
 API_AUTH_URL 
+
+
+## Init for Husky
+npx husky-init && npm install
+npx husky add .husky/pre-commit "npm --no-git-tag-version version patch && git add package.json package-lock.json"
+    "husky": {
+        "hooks": {
+            "pre-commit": "npm --no-git-tag-version version patch && git add package.json package-lock.json"
+        }
+    }

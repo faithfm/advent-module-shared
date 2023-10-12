@@ -1,10 +1,11 @@
 {
     "name": "advent-module-shared",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "This is a module for the Advent Services and contains shared logic",
     "main": "lib/index.js",
     "scripts": {
-        "test": "node test/test.js"
+        "test": "node test/test.js",
+        "prepare": "husky install"
     },
     "repository": {
         "type": "git",
@@ -13,8 +14,16 @@
     "author": "Robbie Berghan",
     "license": "MIT",
     "peerDependencies": {
-        "mongoose": "^7.1.1",
         "advent-module-models": "github:faithfm/advent-module-models",
-        "axios": "^1.4.0"
+        "axios": "^1.4.0",
+        "mongoose": "^7.1.1"
+    },
+    "devDependencies": {
+        "husky": "^8.0.0"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "npm --no-git-tag-version version patch && git add package.json package-lock.json"
+        }
     }
 }
