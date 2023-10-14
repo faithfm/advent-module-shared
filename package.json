@@ -1,6 +1,6 @@
 {
     "name": "advent-module-shared",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "description": "This is a module for the Advent Services and contains shared logic",
     "main": "lib/index.js",
     "scripts": {
