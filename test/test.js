@@ -117,4 +117,62 @@ assert.strictEqual(typeof core.Obfuscate.contact, 'function');
 assert.strictEqual(core.Obfuscate.contact('jane.doe@example.com'), 'jane.dXX@example.com');
 assert.strictEqual(core.Obfuscate.contact('+61412345678'), Obfuscate.mobile('+61412345678'));
 
+// --- LOG_UNSAFE_RAW: all masking off outside production ----------------------
+{
+  process.env.LOG_UNSAFE_RAW = 'true';
+  process.env.APP_ENV = 'dev';
+  const out = sanitizeLog({ mobile: '+61412345678', otp: '123456', email: 'jane.doe@example.com' });
+  assert.strictEqual(out.mobile, '+61412345678');
+  assert.strictEqual(out.otp, '123456');
+  assert.strictEqual(out.email, 'jane.doe@example.com');
+  const q = 'query { x(email: "jane.doe@example.com") }';
+  assert.strictEqual(maskGraphQLStrings(q), q, 'raw mode leaves query strings untouched');
+  const axErr = Object.assign(new Error('Request failed'), {
+    isAxiosError: true,
+    config: { method: 'post', url: '/y?token=abc123', headers: { authorization: 'Bearer tok' }, data: '{"mobile":"+61412345678"}' },
+    response: { status: 401, data: { errors: [{ message: 'bad token' }] } },
+  });
+  const ax = sanitizeLog({ err: axErr }).err;
+  assert.strictEqual(ax.url, '/y?token=abc123', 'raw mode leaves URL params untouched');
+  assert.strictEqual(ax.headers.authorization, 'Bearer tok', 'raw mode restores AxiosError headers');
+  assert.strictEqual(ax.data, '{"mobile":"+61412345678"}');
+  assert.strictEqual(ax.responseData.errors[0].message, 'bad token');
+  // Serialization safety must survive raw mode.
+  const cyc = { mobile: '+61412345678' };
+  cyc.self = cyc;
+  assert.strictEqual(sanitizeLog({ cyc }).cyc.self, '[Circular]');
+  delete process.env.LOG_UNSAFE_RAW;
+  delete process.env.APP_ENV;
+}
+
+// --- LOG_UNSAFE_RAW works in every environment, including production ---------
+{
+  process.env.LOG_UNSAFE_RAW = 'true';
+  process.env.APP_ENV = 'production';
+  const out = sanitizeLog({ mobile: '+61412345678', otp: '123456' });
+  assert.strictEqual(out.mobile, '+61412345678', 'raw mode unmasks in production too');
+  assert.strictEqual(out.otp, '123456');
+  const q = 'query { x(a: "pii") }';
+  assert.strictEqual(maskGraphQLStrings(q), q);
+  delete process.env.LOG_UNSAFE_RAW;
+  delete process.env.APP_ENV;
+  // Flag absent → masking is on regardless of environment.
+  const masked = sanitizeLog({ mobile: '+61412345678', otp: '123456' });
+  assert.strictEqual(masked.mobile, Obfuscate.mobile('+61412345678'));
+  assert.strictEqual(masked.otp, Obfuscate.REDACTED);
+}
+
+// --- LOG_UNSAFE_RAW: redaction:"off" binding tracks the flag ------------------
+{
+  const { createLogger } = require('../lib/logger.logic');
+  process.env.LOG_UNSAFE_RAW = 'true';
+  process.env.APP_ENV = 'production';
+  const rawLogger = createLogger('test-svc', { env: 'production' });
+  assert.strictEqual(rawLogger.bindings().redaction, 'off', 'raw mode stamps redaction:off in any env');
+  delete process.env.LOG_UNSAFE_RAW;
+  delete process.env.APP_ENV;
+  const normalLogger = createLogger('test-svc', { env: 'production' });
+  assert.strictEqual(normalLogger.bindings().redaction, undefined, 'no flag, no stamp');
+}
+
 console.log('All tests passed!');
